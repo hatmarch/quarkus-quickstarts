@@ -40,6 +40,10 @@
 	"runArgs": [ 
 		"-v", "/var/run/docker.sock.raw:/var/run/docker.sock",
 		"-v", "${env:HOME}/.aws:/home/vscode/.aws",
+
+		// For persisting the m2 cache
+		"-v", "${env:HOME}/.m2/:/home/vscode/.m2",
+
 		"-u", "vscode",
 		// use local .oh-my-zsh configuration if it exists (overwriting one in container).
 		// uncomment the following line out if you want to use local installation on host
