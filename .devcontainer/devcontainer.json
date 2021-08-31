@@ -1,0 +1,54 @@
+{
+	"name": "Quarkus Demos Exercises",
+	"dockerFile": "Dockerfile",
+	"appPort": 9000,
+	"extensions": [
+		"ms-python.python",
+		"eamodio.gitlens",
+		"ms-python.vscode-pylance",
+		"visualstudioexptteam.vscodeintellicode",
+		"cstrap.python-snippets",
+		"asciidoctor.asciidoctor-vscode",
+		"hashicorp.terraform",
+		"vscjava.vscode-java-pack",
+		"redhat.vscode-xml",
+		"redhat.vscode-quarkus",
+		"ggrebert.quarkus-snippets",
+		"humao.rest-client",
+		"redhat.vscode-knative",
+	],
+	"settings": {
+		"python.pythonPath": "/usr/local/bin/python",
+		"python.testing.pytestArgs": [
+			"."
+		],
+		"java.home": "/usr/lib/jvm/java-11-openjdk-amd64",
+		"workbench.colorTheme": "Monokai",		
+		"python.testing.unittestEnabled": false,
+		"python.testing.nosetestsEnabled": false,
+		"python.testing.pytestEnabled": true,
+		"python.linting.pylintEnabled": true,
+		"python.linting.pylintPath": "/usr/local/bin/pylint",
+		"python.linting.enabled": true,
+		"terminal.integrated.shell.linux": "/bin/zsh",
+		"python.analysis.typeCheckingMode": "basic",
+	},
+	"postCreateCommand": "./.devcontainer/workspace-setup/workspace-post-create.sh ${containerWorkspaceFolder}",
+	"initializeCommand": "./.devcontainer/workspace-setup/workspace-initialize.sh ${localWorkspaceFolder} ${containerWorkspaceFolder}",
+	// Comment out the next line to run as root instead. Linux users, 
+	// update Dockerfile with your user's UID/GID if not 1000.
+	"runArgs": [ 
+		"-v", "/var/run/docker.sock.raw:/var/run/docker.sock",
+		"-v", "${env:HOME}/.aws:/home/vscode/.aws",
+		"-u", "vscode",
+		// use local .oh-my-zsh configuration if it exists (overwriting one in container).
+		// uncomment the following line out if you want to use local installation on host
+		//"-v", "${env:HOME}/.oh-my-zsh:/home/jboss/.oh-my-zsh",
+
+		// override dockerfile DEMO_HOME to whatever folder vscode considers the root folder in the container
+		"-e", "DEMO_HOME=${containerWorkspaceFolder}",
+		"-e", "AWS_PROFILE=dev",
+		"-e", "AWS_REGION=ap-southeast-2",
+		"-e", "AWS_SHARED_CREDENTIALS_FILE=${containerWorkspaceFolder}/aws-config/credentials"
+	]
+}
