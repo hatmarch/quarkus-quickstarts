@@ -12,14 +12,18 @@ ENV DEBIAN_FRONTEND=noninteractive
 ARG USERNAME=vscode
 ARG USER_UID=1000
 ARG USER_GID=$USER_UID
+ARG GRAALVM_RELEASE_URL="https://github.com/graalvm/graalvm-ce-builds/releases/download/vm-21.2.0/graalvm-ce-java11-linux-amd64-21.2.0.tar.gz"
+ARG GRAALVM_BASEDIR="/usr/local/lib"
+ARG GRAALVM_MAINDIR="graalvm"
 
 # Configure apt and install packages
 RUN apt-get update \
     && apt-get -y install --no-install-recommends apt-utils dialog 2>&1 \
     #
-    # Verify git, process tools, lsb-release (common in install instructions for CLIs) installed, open jdk
+    # Verify git, process tools, lsb-release (common in install instructions for CLIs) installed
     # NOTE: groff is necessary for aws cli support
-    && apt-get -y install maven groff openjdk-11-jdk git less jq procps lsb-release rsync zsh zplug apt-transport-https ca-certificates curl gnupg \
+    # NOTE: openjdk is not necessary as it will packaged with graal
+    && apt-get -y install maven groff git less jq procps lsb-release rsync zsh zplug apt-transport-https ca-certificates curl gnupg \
     #
     # Install pylint
     && pip --disable-pip-version-check --no-cache-dir install pylint ipykernel \
@@ -51,9 +55,21 @@ RUN apt-get update \
 RUN curl "https://d1vvhvl2y92vvt.cloudfront.net/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" && \
     unzip awscliv2.zip && ./aws/install && rm awscliv2.zip && rm -rf ./aws
 
+# install SAM
 RUN curl -L "https://github.com/aws/aws-sam-cli/releases/latest/download/aws-sam-cli-linux-x86_64.zip" -o "aws-sam-cli-linux-x86_64.zip" \
     && unzip aws-sam-cli-linux-x86_64.zip -d sam-installation && ./sam-installation/install \
     && rm aws-sam-cli-linux-x86_64.zip && rm -rf ./sam-installation
+
+# docker post-installation steps
+RUN groupadd docker && usermod -aG docker vscode && usermod -aG root vscode
+
+# install GraalVM
+RUN mkdir -p ${GRAALVM_BASEDIR}/${GRAALVM_MAINDIR} && curl -L ${GRAALVM_RELEASE_URL} -o /tmp/graal.tar.gz \
+    && tar -xzf tmp/graal.tar.gz -C ${GRAALVM_BASEDIR}/${GRAALVM_MAINDIR} --strip-components=1 && rm /tmp/graal.tar.gz \
+    && ${GRAALVM_BASEDIR}/${GRAALVM_MAINDIR}/bin/gu install native-image
+
+ENV JAVA_HOME="${GRAALVM_BASEDIR}/${GRAALVM_MAINDIR}"
+ENV PATH="${JAVA_HOME}/bin;${PATH}"
 
 USER vscode
 

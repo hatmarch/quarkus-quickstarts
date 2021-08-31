@@ -1,6 +1,12 @@
 {
 	"name": "Quarkus Demos Exercises",
-	"dockerFile": "Dockerfile",
+	"build": {
+		// "args": {
+		// 	"GRAALVM_BASEDIR": "/usr/local/lib",
+		// 	"GRAALVM_MAINDIR": "graalvm"
+		// },
+		"dockerfile": "Dockerfile",
+	},
 	"appPort": 9000,
 	"extensions": [
 		"ms-python.python",
@@ -15,14 +21,16 @@
 		"redhat.vscode-quarkus",
 		"ggrebert.quarkus-snippets",
 		"humao.rest-client",
-		"redhat.vscode-knative",
+//		"redhat.vscode-knative",
 	],
 	"settings": {
 		"python.pythonPath": "/usr/local/bin/python",
 		"python.testing.pytestArgs": [
 			"."
 		],
-		"java.home": "/usr/lib/jvm/java-11-openjdk-amd64",
+		// This should be set as an environment variable from the Dockerfile
+		// "java.home": "/usr/lib/jvm/java-11-openjdk-amd64",
+		"java.home": "${env:JAVA_HOME}",
 		"workbench.colorTheme": "Monokai",		
 		"python.testing.unittestEnabled": false,
 		"python.testing.nosetestsEnabled": false,
