@@ -11,6 +11,6 @@ public class FunqyTest {
     public void testSimpleLambdaSuccess() throws Exception {
         Friend friend = new Friend("Bill");
         Greeting out = LambdaClient.invoke(Greeting.class, friend);
-        Assertions.assertEquals("Hello Bill", out.getMessage());
+        Assertions.assertEquals("Hello Bill. Pleased to meet you.", out.getMessage());
     }
 }
