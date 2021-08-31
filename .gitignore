@@ -37,3 +37,6 @@ lsp/
 
 *.swp
 *.swo
+
+# temporary AWS credentials
+aws-config/
