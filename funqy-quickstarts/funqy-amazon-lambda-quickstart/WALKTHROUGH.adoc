@@ -1,0 +1,55 @@
+:experimental: true
+:imagesdir: images/
+
+= Funqy, Lambda, and Quarkus
+
+See also link:https://quarkus.io/guides/funqy-amazon-lambda[here] for the link to the quickstart documentation
+
+== Funqy and project structure
+
+. Use kbd:[CMD+p] to quickly open the `GreetingFunction.java`
+. Point out the highlighted parts of the image
+** notice the inclusion of the `io.quarkus.funqy.Funq` library
+** `@Funq` marks the function as a "serverless function"
+** This means inputs and outputs are automatically translated to POJOs
++
+image::greeting-function.jpg[]
++
+. Use kbd:[CMD+p] to quickly open `application.properties` and point out:
++
+image::export-property.jpg[]
++
+. Build
++
+FIXME
++
+
+== Deploying function
+
+. Check out generated `manage.sh`
+. Find a lambda execution role to which to bind
++
+----
+export LAMBDA_ROLE_ARN=$(aws iam get-role --role-name "lambda.test-lambda" | jq -r '.Role.Arn')
+echo $LAMBDA_ROLE_ARN
+----
++
+. create the function
++
+----
+
+----
++
+. Notice the command that is generated
++
+----
+aws lambda create-function --function-name FunqyAmazonLambdaQuickstart --zip-file fileb:///workspaces/quarkus-quickstarts/funqy-quickstarts/funqy-amazon-lambda-quickstart/target/function.zip --handler io.quarkus.funqy.lambda.FunqyStreamHandler::handleRequest --runtime java11 --role arn:aws:iam::141225792464:role/lambda.test-lambda --timeout 15 --memory-size 256
+----
++
+. Show the successful output
++
+image::funqy-create-success.jpg[]
++
+. Switch to AWS Console and show new lambda
++
+image::lambda-console.jpg[]
