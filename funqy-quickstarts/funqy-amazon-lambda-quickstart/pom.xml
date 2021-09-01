@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>org.acme</groupId>
-    <artifactId>funqy-amazon-lambda-quickstart</artifactId>
+    <artifactId>funqy-amazon-lambda-quickstarter</artifactId>
     <version>1.0.0-SNAPSHOT</version>
     <properties>
         <quarkus-plugin.version>2.1.4.Final</quarkus-plugin.version>
