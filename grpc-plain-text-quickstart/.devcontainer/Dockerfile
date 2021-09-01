@@ -71,6 +71,9 @@ RUN mkdir -p ${GRAALVM_BASEDIR}/${GRAALVM_MAINDIR} && curl -L ${GRAALVM_RELEASE_
 ENV JAVA_HOME="${GRAALVM_BASEDIR}/${GRAALVM_MAINDIR}"
 ENV PATH="${JAVA_HOME}/bin;${PATH}"
 
+# install grpcurl for debugging gRPC
+RUN curl -L -o- https://github.com/fullstorydev/grpcurl/releases/download/v1.8.2/grpcurl_1.8.2_linux_x86_64.tar.gz | tar xzvf - -C /usr/local/bin grpcurl 
+
 USER vscode
 
 RUN /usr/local/bin/python -m pip install -U pytest --user && \
