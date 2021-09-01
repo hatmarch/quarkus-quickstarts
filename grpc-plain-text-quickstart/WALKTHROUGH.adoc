@@ -1,0 +1,143 @@
+:experimental: true
+:imagesdir: images/
+
+= Quarkus gRPC, imperative and reactive, and live reload demo
+
+== Quarkus gRPC
+
+In this section we want to show the `.proto` file and the `.pom` and how these work together to generate familiar gRPC services (but with the `mutiny` twist)
+
+. In VSCode, show the project structure
+. Use kbd:[CMD+p] to quickly open `helloworld.proto`
+. Show the Service and messages
+. Use kbd:[CMD+p] to quick open `pom.xml`
+** Show the quarkus-grpc extension
+** Show mutiny extension
+** Show the quarkus maven plugin
+** Show the `generate-code` goal
+. Open a terminal to run the following command to generate code
++
+----
+mvn compile
+----
++
+. Highlight the following line
++
+----
+[INFO] --- quarkus-maven-plugin:2.1.4.Final:generate-code (default) @ grpc-plain-text-quickstart ---
+----
++
+. Go to the file explorer and show the code generated in the `target\generated-sources\grpc\examples` directory
++
+image::generated-src.jpg[]
++
+. Use kbd:[CMD+p] to quickly open `HelloWorldService.java` and point out all the red highlights
++
+image::hello-world-service.jpg[]
++
+. Use kbd:[CMD+click] on the `GreeterImplBase` to show the generated file that the service extends
+
+== Quarkus live-reload
+
+In this section we use `grpcurl` to call our service.  We show how live reload catches edits to our service without the need of reloading
+
+. If you haven't already, make sure you have a split terminal in vscode
+. [red]#Make sure `HelloWorldService.java` is open when you run this#
+. Start up quarkus with 
++
+----
+mvn quarkus:dev
+----
++
+. Potentially point out the `generate-code` goal as it starts up
+. Point out the different ports as they open (particularly port 9000 if it comes up)
++
+image::ports.jpg[]
++
+. Show the quarkus startup and the installed features
++
+image::features.jpg[]
++
+. In terminal 2 run the following to call the endpoint
++
+----
+grpcurl --plaintext -d '{"name": "World!"}' localhost:9000 helloworld.Greeter/SayHello
+----
++
+You should get a `HelloReply`
++
+----
+{
+  "message": "Hello World!",
+  "count": 1
+}
+----
++ 
+. Now edit the string "Hello " and replace with "Why hello there "
+. Run grpcurl again
++
+----
+grpcurl --plaintext -d '{"name": "World!"}' localhost:9000 helloworld.Greeter/SayHello
+----
++
+. Notice Quarkus recompile
++
+image::reload.jpg[]
++
+. And a new message is returned:
++
+----
+{
+  "message": "Why hello there World!",
+  "count": 2
+}
+----
+
+== Quarkus Endpoint and gRPC consumption
+
+In this section we want to show imperative and reactive side by side by debugging into the app
+
+[IMPORTANT]
+====
+Make sure `mvn quarkus:dev` is running in the background before starting this section
+====
+
+. Use kbd:[CMD+p] to quickly open `HelloWorldEndpoint.java`
+. Point out the `javax.ws` annotations
+. Point out the `@GrpcClient` annotation
+** Notice that each points to a different stub
++
+[TIP]
+====
+Use kbd:[CMD+click] to jump into the stub 
+
+Use kbd:[CTRL+-] to navigate backwards to the `HelloWorldEndpoint.java`
+====
++
+. Split the window and open `application.properties` to the side and show the `host` property
++
+----
+quarkus.grpc.clients.hello.host=localhost
+----
++
+. Place breakpoints in each function
+. Start the debugger with `Debug (Attach)`
+. Switch desktops to Chrome
+. Navigate to the blocking endpoint
++
+----
+http://localhost:8080/hello/blocking/canva
+----
++
+. You should switch to VSCode, continue through the debugger
++
+. Switch back to Chrome desktop and navigate to mutiny
++
+----
+http://localhost:8080/hello/mutiny/canva
+----
++
+. Back in VSCode continue the debugger twice
+. Switch back to Chrome to show the result:
++
+image::endpoint-result.jpg[]
