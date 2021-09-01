@@ -52,6 +52,10 @@
 		// For persisting the m2 cache
 		"-v", "${env:HOME}/.m2/:/home/vscode/.m2",
 
+		// hack to sam to work
+		// "-v", "${localWorkspaceFolder}:${localWorkspaceFolder}",
+		// "-v", "/tmp:/tmp",
+
 		"-u", "vscode",
 		// use local .oh-my-zsh configuration if it exists (overwriting one in container).
 		// uncomment the following line out if you want to use local installation on host
@@ -61,6 +65,7 @@
 		"-e", "DEMO_HOME=${containerWorkspaceFolder}",
 		"-e", "AWS_PROFILE=dev",
 		"-e", "AWS_REGION=ap-southeast-2",
-		"-e", "AWS_SHARED_CREDENTIALS_FILE=${containerWorkspaceFolder}/aws-config/credentials"
+		"-e", "AWS_SHARED_CREDENTIALS_FILE=${containerWorkspaceFolder}/aws-config/credentials",
+		"-e", "DOCKER_VOLUME_BASE_DIR=${localWorkspaceFolder}"
 	]
 }

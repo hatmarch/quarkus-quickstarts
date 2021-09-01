@@ -7,6 +7,20 @@ See also link:https://quarkus.io/guides/funqy-amazon-lambda[here] for the link t
 
 == Funqy and project structure
 
+[IMPORTANT]
+====
+Prior to running this make sure:
+
+. You have a browser open to the link:https://ap-southeast-2.console.aws.amazon.com/lambda/home?region=ap-southeast-2#/functions[Lamdba console] with the same user/role as the console logged into it
+. You have run a `mvn clean` to make sure `target` directory is clear
+. You have deleted any prior instance of the lambdas.  To delete all lambdas in the current account/region issue: 
++
+----
+aws lambda list-functions | jq -r '.Functions[].FunctionName' | xargs -L1 aws lambda delete-function --function-name
+----
+
+====
+
 . Use kbd:[CMD+p] to quickly open the `GreetingFunction.java`
 . Point out the highlighted parts of the image
 ** notice the inclusion of the `io.quarkus.funqy.Funq` library
@@ -15,18 +29,48 @@ See also link:https://quarkus.io/guides/funqy-amazon-lambda[here] for the link t
 +
 image::greeting-function.jpg[]
 +
-. Use kbd:[CMD+p] to quickly open `application.properties` and point out:
+. Right-click to `Split Right` the editor window and then in that new window use kbd:[CMD+p] to quickly open `application.properties` and point out how the name of the function matches the export property:
 +
 image::export-property.jpg[]
 +
-. Build
+. Optionally highlight the quarkus extensions in the pom that make this possible
 +
-FIXME
+image::funqy-pom.jpg[]
 +
+. Build the code
++
+----
+mvn package
+----
++
+. Open the *FileExplorer* and show the files generated (which will include the `manage.sh` that we'll use to deplay)
 
-== Deploying function
+== Local Invocation (with SAM)
 
-. Check out generated `manage.sh`
+. Use kbd:[CMD+p] to quickly open `sam.jvm.yaml`
+** Point out Handler and Runtime
+. Once built, run the following command to invoke lambda with SAM
++
+----
+sam local invoke --template target/sam.jvm.yaml --event payload.json --container-host=host.docker.internal -v ${DOCKER_VOLUME_BASE_DIR}/target
+----
+
+== Deploying the Function
+
+. Use kbd:[CMD+p] to quickly open the generated `manage.sh`
+. Point out some of the key variables
++
+----
+FUNCTION_NAME=FunqyAmazonLambdaQuickstarter #<.>
+HANDLER=io.quarkus.funqy.lambda.FunqyStreamHandler::handleRequest #<.>
+RUNTIME=java11 #<.>
+ZIP_FILE=fileb:///workspaces/quarkus-quickstarts/funqy-quickstarts/funqy-amazon-lambda-quickstart/target/function.zip #<.>
+----
+<.> This is named for the `artifactId` specified in the pom (in this case `funqy-amazon-lambda-quickstarter`)
+<.> This never changes and is always the handler for Funqy functions
+<.> Comes from the pom runtime
+<.> The file that represents our function and its layers
++
 . Find a lambda execution role to which to bind
 +
 ----
@@ -37,7 +81,7 @@ echo $LAMBDA_ROLE_ARN
 . create the function
 +
 ----
-
+target/manage.sh create 
 ----
 +
 . Notice the command that is generated
@@ -53,3 +97,87 @@ image::funqy-create-success.jpg[]
 . Switch to AWS Console and show new lambda
 +
 image::lambda-console.jpg[]
+
+== Create native function
+
+[TIP]
+====
+This can be done in the background if performing live
+====
+
+. Open the `pom.xml` and show the `native` profile
+. back at the command line run:
++
+----
+mvn package -Pnative
+----
++
+. When the build is finished, point out the time that was taken
++
+image::native-build-output.jpg[]
++
+. Pause to inspect the output created with the `file` command
++
+----
+file target/funqy-amazon-lambda-quickstarter-1.0.0-SNAPSHOT-runner
+----
++
+. This should show a native binary: 
++
+----
+target/funqy-amazon-lambda-quickstarter-1.0.0-SNAPSHOT-runner: ELF 64-bit LSB executable, x86-64, version 1 (SYSV), dynamically linked, interpreter /lib64/ld-linux-x86-64.so.2, BuildID[sha1]=125617324f9f09975e594ae3a4981b992a0f6c21, for GNU/Linux 3.2.0, not stripped
+----
++
+. Create the native function using the same `manage.sh` script but with the `native` subcommand:
++
+----
+target/manage.sh native create
+----
++
+----
+Creating function
+++ aws lambda create-function --function-name FunqyAmazonLambdaQuickstarterNative --zip-file fileb:///workspaces/quarkus-quickstarts/funqy-quickstarts/funqy-amazon-lambda-quickstart/target/function.zip --handler io.quarkus.funqy.lambda.FunqyStreamHandler::handleRequest --runtime provided --role arn:aws:iam::141225792464:role/lambda.test-lambda --timeout 15 --memory-size 256 --environment 'Variables={DISABLE_SIGNAL_HANDLERS=true}'
+----
++
+. Switch the the AWS Console and show the function
++
+image::two-functions.jpg[]
+
+== Invoking Lambda from Console
+
+. Switch to the desktop with the Lambda console window
+. Select the *Test* tab
++
+image::lambda-test-tab.jpg[]
++
+. Enter the test event event data per the screenshot and press the *Test* button
++
+image::console-invoke-test-event.jpg[]
++
+. After a few moments you should get output like the following (after you expand out the results)
++
+image::lambda-console-results.jpg[]
+
+== Invoking Lambda from command line (and comparing execution times)
+
+. Use kbd:[CMD+p] to quickly open payload.json
+. You might want to compare this to the `Friend.java` POJO
+. To invoke the non-native function, call:
++
+----
+target/manage.sh invoke
+----
+. And take a look at the output
++
+image::invoke-non-native.jpg[]
++
+. Split the terminal.  
+. In the second shell, invoke the native function with this command
++
+----
+target/manage.sh native invoke
+----
++ 
+. And take a look at the output, comparing it to the non-native one
++
+input::native-and-non-native-invoke.jpg[]
