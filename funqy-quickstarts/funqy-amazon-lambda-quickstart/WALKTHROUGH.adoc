@@ -180,4 +180,4 @@ target/manage.sh native invoke
 + 
 . And take a look at the output, comparing it to the non-native one
 +
-input::native-and-non-native-invoke.jpg[]
+image::native-and-non-native-invoke.jpg[]
